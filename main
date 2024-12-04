@@ -1,0 +1,27 @@
+import java.io.*;
+
+public class MainApp {
+
+    public static void main(String[] args) {
+        String filePath = "C:\\Users\\HP\\Downloads\\sample.xml";
+        String outputFilePath = "C:\\Users\\HP\\Downloads\\formatted_sample.xml";
+
+        try {
+            // Read the entire file content
+            StringBuilder xmlContent = new StringBuilder();
+            try (BufferedReader file = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = file.readLine()) != null) {
+                    xmlContent.append(line).append("\n");
+                }
+            }
+
+            // Call the formatXML method from XMLFormatter class
+            XMLFormatter.formatXML(xmlContent.toString(), outputFilePath);
+
+        } catch (IOException e) {
+            System.err.println("Error: Could not read file " + filePath);
+            e.printStackTrace();
+        }
+    }
+}

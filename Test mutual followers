@@ -1,0 +1,38 @@
+ public static void main(String[] args) {
+        System.out.println(new App().getGreeting());
+        List<List<Integer>> x = new ArrayList<>();
+        List<Integer> output = new ArrayList<>();
+        List<Integer> result;
+
+        x.add(Arrays.asList(0, 1, 7, 9));
+        x.add(Arrays.asList(1, 0, 2, 3, 6));
+        x.add(Arrays.asList(2, 1, 4));
+        x.add(Arrays.asList(3, 1, 4, 5,7));
+        x.add(Arrays.asList(4, 2, 3));
+        x.add(Arrays.asList(5, 3, 6, 8));
+        x.add(Arrays.asList(6, 1, 5, 7,8));
+        x.add(Arrays.asList(7, 0, 3, 6, 8, 9));
+        x.add(Arrays.asList(8, 5, 7, 9,6));
+        x.add(Arrays.asList(9, 0, 7, 8));
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("How many followers: ");
+        int N = scanner.nextInt();
+       
+        for (int i = 0; i < N; i++) {
+            System.out.print("Enter follower id: ");
+            int z = scanner.nextInt();
+            output.add(z);
+        }
+
+        result = findMutualFriends(x, output);
+        System.out.print("The mutual followers are {");
+        for (int i = 0; i < result.size(); i++) {
+            System.out.print(result.get(i));
+            if (i != result.size() - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("}");
+        
+    }

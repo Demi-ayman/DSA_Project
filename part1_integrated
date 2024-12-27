@@ -9,10 +9,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Stack;
 
 public class Main extends Application {
 
@@ -22,40 +22,78 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        root = new BorderPane();
+        // Start Page Background Image
+        Image startBackground = new Image("file:src/photos/Mina.jpg");
+        ImageView startBackgroundView = new ImageView(startBackground);
+        startBackgroundView.setPreserveRatio(false);
+        startBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
+        startBackgroundView.fitHeightProperty().bind(primaryStage.heightProperty());
 
-        // Create the sections
+        // StackPane for Start Page
+        StackPane startPane = new StackPane();
+        startPane.getChildren().add(startBackgroundView);
+
+        // Start Button
+        Button startButton = new Button("Start");
+        startButton.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
+        startButton.setStyle("-fx-font-size: 20px; -fx-background-color: #4682B4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20 10 20;");
+        startButton.setOnAction(event -> showMainProject(primaryStage));
+
+        // Cancel Button
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
+        cancelButton.setStyle("-fx-font-size: 17px; -fx-background-color: #4682B4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20 10 20;");
+        cancelButton.setOnAction(event -> primaryStage.close()); // Close the application on cancel
+
+        // VBox for Buttons
+        VBox buttonBox = new VBox(10, startButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        // Add Button Box to Start Pane
+        startPane.getChildren().add(buttonBox);
+        StackPane.setAlignment(buttonBox, Pos.CENTER_RIGHT);
+        StackPane.setMargin(buttonBox, new Insets(0, 175, 80, 0));
+
+        // Scene for Start Page
+        Scene startScene = new Scene(startPane, 1000, 600);
+        primaryStage.setScene(startScene);
+        primaryStage.setTitle("Welcome Page");
+        primaryStage.show();
+    }
+
+    private void showMainProject(Stage primaryStage) {
+        // Main Project Background Image
+        Image mainBackground = new Image("file:src/photos/Yous.jpg");
+        ImageView mainBackgroundView = new ImageView(mainBackground);
+        mainBackgroundView.setPreserveRatio(false);
+        mainBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
+        mainBackgroundView.fitHeightProperty().bind(primaryStage.heightProperty());
+
+        // StackPane for Main Project
+        StackPane rootPane = new StackPane();
+        rootPane.getChildren().add(mainBackgroundView);
+
+        // Main Layout (BorderPane)
+        root = new BorderPane();
+        rootPane.getChildren().add(root);
+
+        // Create Sections
         VBox inputSection = createInputSection();
         VBox buttonSection = createButtonSection();
         VBox outputSection = createOutputSection();
 
-        // Set sections to the appropriate positions
+        // Set Sections to Positions
         root.setLeft(buttonSection);
         root.setCenter(inputSection);
         root.setRight(outputSection);
 
-        // Use the absolute path for the background image and convert it to a URL
-        String imagePath = "C:/Users/youss/OneDrive/Desktop/java tutrial/DSA_Project/src/resources/background1.jpg";
-        File imageFile = new File(imagePath);
-        if (imageFile.exists()) {
-            Image backgroundImage = new Image(imageFile.toURI().toString());
-            BackgroundImage bgImage = new BackgroundImage(backgroundImage,
-                    BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                    BackgroundSize.DEFAULT);
-            Background background = new Background(bgImage);
-
-            // Set the background to the root container
-            root.setBackground(background);
-        } else {
-            System.out.println("Image file not found: " + imagePath);
-        }
-
-        // Create the scene and set properties
-        Scene scene = new Scene(root, 1000, 600);
-        primaryStage.setScene(scene);
+        // Scene for Main Project
+        Scene mainScene = new Scene(rootPane, 1000, 600);
+        primaryStage.setScene(mainScene);
         primaryStage.setTitle("XML Editor");
-        primaryStage.show();
     }
+
+
 
     private VBox createInputSection() {
         VBox inputSection = new VBox(10);
@@ -63,16 +101,16 @@ public class Main extends Application {
         inputSection.setAlignment(Pos.TOP_CENTER);
 
         Label inputLabel = new Label("Input XML/JSON:");
-        inputLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        inputLabel.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
 
         xmlInputArea = new TextArea();
-        xmlInputArea.setPrefHeight(300);
-        xmlInputArea.setMaxWidth(Double.MAX_VALUE);
-        xmlInputArea.setFont(Font.font("Arial", 14));
+        xmlInputArea.setPrefHeight(550);
+        xmlInputArea.setMaxWidth(580);  // Make the TextArea flexible
+        xmlInputArea.setFont(Font.font("Arial", 15));
 
         Button browseButton = new Button("Browse XML File");
-        browseButton.setFont(Font.font("Arial", FontWeight.MEDIUM, 14));
-        browseButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;");
+        browseButton.setFont(Font.font("Serif", FontWeight.BOLD, 15));
+        browseButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;-fx-font-size: 16px");
         browseButton.setOnAction(event -> openFileChooser(xmlInputArea));
 
         inputSection.getChildren().addAll(inputLabel, xmlInputArea, browseButton);
@@ -81,10 +119,11 @@ public class Main extends Application {
 
     private VBox createButtonSection() {
         VBox buttonSection = new VBox(15);
-        buttonSection.setPadding(new Insets(30, 20, 20, 20));
+        buttonSection.setPadding(new Insets(55, 22, 22, 22));  // Slightly more padding to move buttons down
         buttonSection.setAlignment(Pos.TOP_LEFT);
 
-        String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 14px;";
+
+        String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
 
         Button validateButton = new Button("Validate XML");
         validateButton.setStyle(buttonStyle);
@@ -120,17 +159,17 @@ public class Main extends Application {
         outputSection.setAlignment(Pos.TOP_CENTER);
 
         Label outputLabel = new Label("Output:");
-        outputLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        outputLabel.setFont(Font.font("Serif", FontWeight.BOLD, 16));
 
         outputArea = new TextArea();
         outputArea.setEditable(false);
-        outputArea.setFont(Font.font("Arial", 14));
-        outputArea.setPrefHeight(300);
-        outputArea.setMaxWidth(Double.MAX_VALUE);
+        outputArea.setFont(Font.font("Arial", 15));
+        outputArea.setPrefHeight(550);
+        outputArea.setMaxWidth(580);  // Make the TextArea flexible
 
         Button saveButton = new Button("Save Output");
-        saveButton.setFont(Font.font("Arial", FontWeight.MEDIUM, 14));
-        saveButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;");
+        saveButton.setFont(Font.font("Serif", FontWeight.BOLD, 15));
+        saveButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;-fx-font-size: 16px");
         saveButton.setOnAction(event -> saveOutput(outputArea.getText()));
 
         outputSection.getChildren().addAll(outputLabel, outputArea, saveButton);
@@ -216,7 +255,6 @@ public class Main extends Application {
         }
     }
 
-
     private void decompressFile() {
         try {
             FileChooser fileChooser = new FileChooser();
@@ -272,7 +310,6 @@ public class Main extends Application {
             showErrorDialog("Unexpected error: " + e.getMessage());
         }
     }
-
 
     private void openFileChooser(TextArea xmlInputArea) {
         FileChooser fileChooser = new FileChooser();

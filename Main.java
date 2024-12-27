@@ -1,26 +1,28 @@
 package org.example;
-import java.io.*;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.List;
+
+import static org.example.DSprojectJAVA.parseXML;
+
 public class Main {
     public static void main(String[] args) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        // Create an instance of the graph
+        DSprojectJAVA.Graph graph = DSprojectJAVA.getGraph();
 
-        try {
-            System.out.print("Enter the input XML file path: ");
-            String inputFile = reader.readLine();
+        // Parse the XML file and populate the graph
+        parseXML("F:\\Senior\\Sem1\\DSA\\level2file.xml", graph);
 
-            System.out.print("Enter the output XML file path: ");
-            String outputFile = reader.readLine();
+        // Create an instance of PostSearch
+        PostSearch postSearch = new PostSearch();
 
-            // Create an instance of XMLMinifier
-            XMLMinifier minifier = new XMLMinifier(inputFile, outputFile);
+        // Search for posts containing a specific topic
+        List<DSprojectJAVA.Post> foundPostsByTopic = postSearch.searchPostsByTopic(graph, "Technology");
+        System.out.println("Posts containing the topic 'Technology':");
+        postSearch.displayPosts(foundPostsByTopic, graph);  // Pass the graph to displayPosts
 
-            // Perform the minification
-            minifier.minify();
-        } catch (IOException e) {
-            System.err.println("Error: Failed to read input.");
-        }
+        // Search for posts containing a specific word in the body
+        List<DSprojectJAVA.Post> foundPostsByWord = postSearch.searchPostsByWord(graph, "AI");
+        System.out.println("Posts containing the word 'AI':");
+        postSearch.displayPosts(foundPostsByWord, graph);  // Pass the graph to displayPosts
     }
 }

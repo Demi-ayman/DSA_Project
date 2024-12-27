@@ -15,115 +15,123 @@ import java.util.stream.Collectors;
 
 public class DSprojectJAVA {
 
-static class Post {
-    private String body;
-    private List<String> topics;
+    public static class Post {
+        private String body;
+        private List<String> topics;
 
-    public Post(String body) {
-        this.body = body;
-        this.topics = new ArrayList<>();
-    }
+        public Post(String body) {
+            this.body = body;
+            this.topics = new ArrayList<>();
+        }
 
-    public void addTopic(String topic) {
-        this.topics.add(topic);
-    }
+        public void addTopic(String topic) {
+            this.topics.add(topic);
+        }
 
-    public String getBody() {
-        return body;
-    }
+        public String getBody() {
+            return body;
+        }
 
-    public List<String> getTopics() {
-        return topics;
-    }
-}
-
-static class User {
-    private int id;
-    private String name;
-    private List<Post> posts;
-    private List<Integer> followers;
-
-    public User(int id, String name) {
-        this.id = id;
-        this.name = name;
-        this.posts = new ArrayList<>();
-        this.followers = new ArrayList<>();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<Post> getPosts() {
-        return posts;
-    }
-
-    public List<Integer> getFollowers() {
-        return followers;
-    }
-
-    public void addPost(Post post) {
-        this.posts.add(post);
-    }
-
-    public void addFollower(int followerId) {
-        this.followers.add(followerId);
-    }
-}
-
-static class Graph {
-    private List<User> users;
-
-    public Graph() {
-        this.users = new ArrayList<>();
-    }
-
-    public void addUser(int id, String name) {
-        users.add(new User(id, name));
-    }
-
-    public void addPost(int userId, Post post) {
-        for (User user : users) {
-            if (user.getId() == userId) {
-                user.addPost(post);
-                return;
-            }
+        public List<String> getTopics() {
+            return topics;
         }
     }
 
-    public void addFollower(int followerId, int userId) {
-        for (User user : users) {
-            if (user.getId() == userId) {
-                user.addFollower(followerId);
-                return;
-            }
+    public static class User {
+        private int id;
+        private String name;
+        private List<Post> posts;
+        private List<Integer> followers;
+
+        public User(int id, String name) {
+            this.id = id;
+            this.name = name;
+            this.posts = new ArrayList<>();
+            this.followers = new ArrayList<>();
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<Post> getPosts() {
+            return posts;
+        }
+
+        public List<Integer> getFollowers() {
+            return followers;
+        }
+
+        public void addPost(Post post) {
+            this.posts.add(post);
+        }
+
+        public void addFollower(int followerId) {
+            this.followers.add(followerId);
         }
     }
 
-    public void displayGraph() {
-        for (User user : users) {
-            System.out.println("User ID: " + user.getId() + ", Name: " + user.getName());
+    public static class Graph {
+        private List<User> users;
 
-            System.out.println("Posts:");
-            for (Post post : user.getPosts()) {
-                System.out.println("  Body: " + post.getBody());
-                System.out.println("  Topics: " + String.join(" ", post.getTopics()));
-            }
-
-            System.out.println("Followers: " + user.getFollowers().stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(" ")));
-            System.out.println();
+        public Graph() {
+            this.users = new ArrayList<>();
         }
+
+        public void addUser(int id, String name) {
+            users.add(new User(id, name));
+        }
+
+        public void addPost(int userId, Post post) {
+            for (User user : users) {
+                if (user.getId() == userId) {
+                    user.addPost(post);
+                    return;
+                }
+            }
+        }
+
+        public void addFollower(int followerId, int userId) {
+            for (User user : users) {
+                if (user.getId() == userId) {
+                    user.addFollower(followerId);
+                    return;
+                }
+            }
+        }
+
+        public void displayGraph() {
+            for (User user : users) {
+                System.out.println("User ID: " + user.getId() + ", Name: " + user.getName());
+
+                System.out.println("Posts:");
+                for (Post post : user.getPosts()) {
+                    System.out.println("  Body: " + post.getBody());
+                    System.out.println("  Topics: " + String.join(" ", post.getTopics()));
+                }
+
+                System.out.println("Followers: " + user.getFollowers().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(" ")));
+                System.out.println();
+            }
+        }
+        public List<User> getUsers() {
+            return this.users;
+        }
+
     }
-}
 
 
     private static Graph graph = new Graph();
+    public static Graph getGraph() {
+        return graph;
+    }
+
     private static String extractValue(String data, String openTag, String closeTag) {
         int start = data.indexOf(openTag);
         if (start == -1) return "";
@@ -238,12 +246,12 @@ static class Graph {
     }
 
 
-public static void main(String[] args) {
-        
+    public static void main(String[] args) {
+
         // Parse the XML file and populate the graph
         parseXML("sample.xml", graph);
 
         // Display the graph
         graph.displayGraph();
-}
+    }
 }

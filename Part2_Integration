@@ -125,8 +125,8 @@ public class Main extends Application {
     }
 
     private VBox createButtonSection() {
-        VBox buttonSection = new VBox(5);
-        buttonSection.setPadding(new Insets(45, 12, 12, 12));  // Slightly more padding to move buttons down
+        VBox buttonSection = new VBox(3);
+        buttonSection.setPadding(new Insets(43, 10, 10, 20));  // Slightly more padding to move buttons down
         buttonSection.setAlignment(Pos.TOP_LEFT);
 
         String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
@@ -175,10 +175,14 @@ public class Main extends Application {
         mutualUsersButton.setStyle(buttonStyle);
         mutualUsersButton.setOnAction(event -> findMutualUsers());
 
+        Button suggestedFollowersButton = new Button("Suggested Users");
+        suggestedFollowersButton.setStyle(buttonStyle);
+        suggestedFollowersButton.setOnAction(event -> suggestedFollowers());
+
         buttonSection.getChildren().addAll(
                 validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton,
                 minifyButton, parseXMLButton, visualizeGraphButton, mostInfluentialButton, mostActiveButton,
-                mutualUsersButton
+                mutualUsersButton,suggestedFollowersButton
         );
         return buttonSection;
     }
@@ -254,6 +258,52 @@ public class Main extends Application {
         // Return the list of nodes
         return nodes;
     }
+
+    private void suggestedFollowers() {
+        try {
+            // Get the input XML from the text area in the app
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML); // Assuming parseXMLToNodes() is implemented
+            System.out.println("Parsed Nodes: " + nodes);
+
+            // Build the adjacency list from the nodes
+            Map<Integer, List<Integer>> graph = SuggestedFollowers.buildAdjacencyListFromNodes(nodes);
+
+            // Ask the user for the ID of the person to get suggestions for
+            String userIdInput = JOptionPane.showInputDialog("Enter the User ID to suggest followers for:");
+            if (userIdInput == null || userIdInput.trim().isEmpty()) {
+                showErrorDialog("User ID cannot be empty.");
+                return;
+            }
+
+            int userId;
+            try {
+                userId = Integer.parseInt(userIdInput);
+            } catch (NumberFormatException e) {
+                showErrorDialog("Invalid User ID. Please enter a valid number.");
+                return;
+            }
+
+            // Get suggested followers using the SuggestedFollowers class and the graph
+            List<Integer> suggestions = SuggestedFollowers.suggestFollowers(graph, userId);
+
+            // Display the suggested followers in the output area
+            if (suggestions.isEmpty()) {
+                outputArea.setText("No suggested followers for User ID: " + userId);
+            } else {
+                outputArea.setText("Suggested followers for User ID " + userId + ": " + suggestions);
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error suggesting followers: " + e.getMessage());
+        }
+    }
+
 
     private void findMutualUsers() {
         try {

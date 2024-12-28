@@ -1,156 +1,335 @@
 package com.example;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.stage.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+
+import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Scanner;
-import java.io.File;
-public class MainApp extends Application {
+
+public class Main extends Application {
 
     private BorderPane root;
     private TextArea xmlInputArea;
     private TextArea outputArea;
+
     @Override
     public void start(Stage primaryStage) {
-        // Create the main layout
-        root = new BorderPane();
+        // Start Page Background Image
+        Image startBackground = new Image("file:src/photos/Mina.jpg");
+        ImageView startBackgroundView = new ImageView(startBackground);
+        startBackgroundView.setPreserveRatio(false);
+        startBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
+        startBackgroundView.fitHeightProperty().bind(primaryStage.heightProperty());
 
-        // Create input, button, and output sections
+        // StackPane for Start Page
+        StackPane startPane = new StackPane();
+        startPane.getChildren().add(startBackgroundView);
+
+        // Start Button
+        Button startButton = new Button("Start");
+        startButton.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
+        startButton.setStyle("-fx-font-size: 20px; -fx-background-color: #4682B4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20 10 20;");
+        startButton.setOnAction(event -> showMainProject(primaryStage));
+
+        // Cancel Button
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
+        cancelButton.setStyle("-fx-font-size: 17px; -fx-background-color: #4682B4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20 10 20;");
+        cancelButton.setOnAction(event -> primaryStage.close()); // Close the application on cancel
+
+        // VBox for Buttons
+        VBox buttonBox = new VBox(10, startButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        // Add Button Box to Start Pane
+        startPane.getChildren().add(buttonBox);
+        StackPane.setAlignment(buttonBox, Pos.CENTER_RIGHT);
+        StackPane.setMargin(buttonBox, new Insets(0, 175, 80, 0));
+
+        // Scene for Start Page
+        Scene startScene = new Scene(startPane, 1000, 600);
+        primaryStage.setScene(startScene);
+        primaryStage.setTitle("Welcome Page");
+        primaryStage.show();
+    }
+
+    private void showMainProject(Stage primaryStage) {
+        // Main Project Background Image
+        Image mainBackground = new Image("file:src/photos/Yous.jpg");
+        ImageView mainBackgroundView = new ImageView(mainBackground);
+        mainBackgroundView.setPreserveRatio(false);
+        mainBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
+        mainBackgroundView.fitHeightProperty().bind(primaryStage.heightProperty());
+
+        // StackPane for Main Project
+        StackPane rootPane = new StackPane();
+        rootPane.getChildren().add(mainBackgroundView);
+
+        // Main Layout (BorderPane)
+        root = new BorderPane();
+        rootPane.getChildren().add(root);
+
+        // Create Sections
         VBox inputSection = createInputSection();
         VBox buttonSection = createButtonSection();
         VBox outputSection = createOutputSection();
 
-        // Add sections to the layout
-        root.setTop(inputSection);
-        root.setCenter(buttonSection);
-        root.setBottom(outputSection);
+        // Set Sections to Positions
+        root.setLeft(buttonSection);
+        root.setCenter(inputSection);
+        root.setRight(outputSection);
 
-        // Set the scene and stage
-        Scene scene = new Scene(root, 800, 600);
-        primaryStage.setScene(scene);
+        // Scene for Main Project
+        Scene mainScene = new Scene(rootPane, 1000, 600);
+        primaryStage.setScene(mainScene);
         primaryStage.setTitle("XML Editor");
-        primaryStage.show();
     }
+
+
+
     private VBox createInputSection() {
         VBox inputSection = new VBox(10);
+        inputSection.setPadding(new Insets(20));
+        inputSection.setAlignment(Pos.TOP_CENTER);
+
         Label inputLabel = new Label("Input XML/JSON:");
+        inputLabel.setFont(Font.font("Serif", FontWeight.EXTRA_BOLD, 16));
+
         xmlInputArea = new TextArea();
+        xmlInputArea.setPrefHeight(550);
+        xmlInputArea.setMaxWidth(580);  // Make the TextArea flexible
+        xmlInputArea.setFont(Font.font("Arial", 15));
+
         Button browseButton = new Button("Browse XML File");
+        browseButton.setFont(Font.font("Serif", FontWeight.BOLD, 15));
+        browseButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;-fx-font-size: 16px");
         browseButton.setOnAction(event -> openFileChooser(xmlInputArea));
+
         inputSection.getChildren().addAll(inputLabel, xmlInputArea, browseButton);
         return inputSection;
     }
-    private VBox createButtonSection() {
-        VBox buttonSection = new VBox(10);
-        Button prettifyButton = new Button("Prettify XML");
-        Button convertToJSONButton = new Button("Convert to JSON");
-        Button compressButton = new Button("Compress File");
-        Button decompressButton = new Button("Decompress File");
-        Button minifyButton = new Button("Minify XML");
 
+    private VBox createButtonSection() {
+        VBox buttonSection = new VBox(15);
+        buttonSection.setPadding(new Insets(55, 22, 22, 22));  // Slightly more padding to move buttons down
+        buttonSection.setAlignment(Pos.TOP_LEFT);
+
+
+        String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
+
+        Button validateButton = new Button("Validate XML");
+        validateButton.setStyle(buttonStyle);
+        validateButton.setOnAction(event -> validateXML());
+
+        Button prettifyButton = new Button("Prettify XML");
+        prettifyButton.setStyle(buttonStyle);
         prettifyButton.setOnAction(event -> prettifyXML());
+
+        Button convertToJSONButton = new Button("Convert to JSON");
+        convertToJSONButton.setStyle(buttonStyle);
         convertToJSONButton.setOnAction(event -> convertToJSON());
+
+        Button compressButton = new Button("Compress File");
+        compressButton.setStyle(buttonStyle);
         compressButton.setOnAction(event -> compressFile());
+
+        Button decompressButton = new Button("Decompress File");
+        decompressButton.setStyle(buttonStyle);
         decompressButton.setOnAction(event -> decompressFile());
+
+        Button minifyButton = new Button("Minify XML");
+        minifyButton.setStyle(buttonStyle);
         minifyButton.setOnAction(event -> minifyXML());
 
-        buttonSection.getChildren().addAll(prettifyButton, convertToJSONButton, compressButton, decompressButton, minifyButton);
+        // Add new button for parsing XML and saving output
+        Button parseXMLButton = new Button("Parse and Save XML");
+        parseXMLButton.setStyle(buttonStyle);
+        parseXMLButton.setOnAction(event -> parseAndSaveXML());
+
+        // Add new button for visualizing and saving the graph
+        Button visualizeGraphButton = new Button("Visualize and Save Graph");
+        visualizeGraphButton.setStyle(buttonStyle);
+        visualizeGraphButton.setOnAction(event -> visualizeAndSaveGraph());
+
+        buttonSection.getChildren().addAll(validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton, minifyButton, parseXMLButton, visualizeGraphButton);
         return buttonSection;
     }
 
     private VBox createOutputSection() {
         VBox outputSection = new VBox(10);
+        outputSection.setPadding(new Insets(20));
+        outputSection.setAlignment(Pos.TOP_CENTER);
+
         Label outputLabel = new Label("Output:");
+        outputLabel.setFont(Font.font("Serif", FontWeight.BOLD, 16));
+
         outputArea = new TextArea();
         outputArea.setEditable(false);
+        outputArea.setFont(Font.font("Arial", 15));
+        outputArea.setPrefHeight(550);
+        outputArea.setMaxWidth(580);  // Make the TextArea flexible
+
         Button saveButton = new Button("Save Output");
+        saveButton.setFont(Font.font("Serif", FontWeight.BOLD, 15));
+        saveButton.setStyle("-fx-background-color: #87CEEB; -fx-text-fill: white;-fx-font-size: 16px");
         saveButton.setOnAction(event -> saveOutput(outputArea.getText()));
+
         outputSection.getChildren().addAll(outputLabel, outputArea, saveButton);
         return outputSection;
     }
-    private void prettifyXML() {
+    private void parseAndSaveXML() {
         try {
-            // Get the input and output areas
-            VBox inputSection = (VBox) root.getTop();
-            TextArea xmlInputArea = (TextArea) inputSection.getChildren().get(1);
-            VBox outputSection = (VBox) root.getBottom();
-            TextArea outputArea = (TextArea) outputSection.getChildren().get(1);
+            // Open file chooser to select XML file
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+            File selectedFile = fileChooser.showOpenDialog(null);
 
+            if (selectedFile != null) {
+                // Parse the XML file and populate the graph
+                XMLParser.parseXML(selectedFile.getAbsolutePath(), XMLParser.getGraph());
+
+                // Save the graph to a text file
+                FileChooser saveFileChooser = new FileChooser();
+                saveFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+                saveFileChooser.setInitialFileName("output.txt");
+                File outputFile = saveFileChooser.showSaveDialog(null);
+
+                if (outputFile != null) {
+                    XMLParser.getGraph().displayGraphToFile(outputFile.getAbsolutePath());
+
+                    // Display the saved file content in the output area
+                    outputArea.setText(new String(java.nio.file.Files.readAllBytes(outputFile.toPath())));
+                }
+            } else {
+                outputArea.setText("No file selected.");
+            }
+        } catch (IOException e) {
+            showErrorDialog("Error parsing and saving XML: " + e.getMessage());
+        }
+    }
+    private void visualizeAndSaveGraph() {
+        try {
+            // Check if the graph is populated
+            XMLParser.Graph graph = XMLParser.getGraph();
+            if (graph == null || graph.getUsers().isEmpty()) {
+                showErrorDialog("Graph is empty. Please load and parse an XML file first.");
+                return;
+            }
+
+            // Visualize the graph in a new window
+            JFrame frame = new JFrame("Graph Visualizer");
+            GraphVisualizer visualizer = new GraphVisualizer(graph);
+            frame.add(visualizer);
+            frame.setSize(800, 800);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setVisible(true);
+
+            // Prompt the user to save the graph as an image
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JPG Files", "*.jpg"));
+            fileChooser.setInitialFileName("graph_output.jpg");
+            File saveFile = fileChooser.showSaveDialog(null);
+
+            if (saveFile != null) {
+                GraphVisualizer.saveGraphAsImage(graph, saveFile.getAbsolutePath());
+                outputArea.setText("Graph visualized and saved as an image at: " + saveFile.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error visualizing and saving graph: " + e.getMessage());
+        }
+    }
+
+
+
+    private void validateXML() {
+        try {
             String inputXML = xmlInputArea.getText();
             if (inputXML.isEmpty()) {
                 showErrorDialog("Input XML is empty. Please load or type XML content.");
                 return;
             }
 
-            // Prompt user to select a location to save the prettified file
+            // Validate and get the corrected XML (if any)
+            String correctedXML = XMLValidate.validation(inputXML);
+
+            // Check if the XML was modified or not
+            if (correctedXML.equals(inputXML)) {
+                outputArea.setText("Valid XML.");
+            } else {
+                outputArea.setText("Invalid XML. Please check the corrected file.");
+
+                // Prompt user to save the corrected XML file
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+                fileChooser.setInitialFileName("corrected.xml");
+                File saveFile = fileChooser.showSaveDialog(null);
+
+                if (saveFile != null) {
+                    // Save the corrected XML content to the chosen file
+                    XMLFormatter.formatXML(correctedXML, saveFile.getAbsolutePath());
+
+                    // Display the saved corrected XML in the output area
+                    outputArea.setText(correctedXML);
+                }
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error processing XML: " + e.getMessage());
+        }
+    }
+
+
+    private void prettifyXML() {
+        try {
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
             fileChooser.setInitialFileName("prettified.xml");
             File saveFile = fileChooser.showSaveDialog(null);
 
             if (saveFile != null) {
-                // Call the XMLFormatter's formatXML method to prettify and save the file
                 XMLFormatter.formatXML(inputXML, saveFile.getAbsolutePath());
-
-                // Read the prettified file and display its content in the output area
-                try (Scanner scanner = new Scanner(saveFile)) {
-                    StringBuilder prettifiedXML = new StringBuilder();
-                    while (scanner.hasNextLine()) {
-                        prettifiedXML.append(scanner.nextLine()).append("\n");
-                    }
-                    outputArea.setText(prettifiedXML.toString());
-                } catch (IOException e) {
-                    showErrorDialog("Error reading prettified XML: " + e.getMessage());
-                }
+                outputArea.setText(new String(java.nio.file.Files.readAllBytes(saveFile.toPath())));
             }
         } catch (Exception e) {
             showErrorDialog("Error prettifying XML: " + e.getMessage());
         }
     }
+
     private void convertToJSON() {
         try {
-            // Get the input and output areas
-            VBox inputSection = (VBox) root.getTop();
-            TextArea xmlInputArea = (TextArea) inputSection.getChildren().get(1);
-            VBox outputSection = (VBox) root.getBottom();
-            TextArea outputArea = (TextArea) outputSection.getChildren().get(1);
-
             String inputXML = xmlInputArea.getText();
             if (inputXML.isEmpty()) {
                 showErrorDialog("Input XML is empty. Please load or type XML content.");
                 return;
             }
 
-            // Prompt user to select a location to save the JSON file
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
             fileChooser.setInitialFileName("output.json");
             File saveFile = fileChooser.showSaveDialog(null);
 
             if (saveFile != null) {
-                // Convert the XML content to a tree structure
                 Node root = XMLToTreeConverter.parseXMLFromString(inputXML);
-
-                // Convert the tree structure to JSON format
                 String json = TreeToJSONConverter.convertToJSON(root);
-
-                // Write the JSON data to the specified file
                 TreeToJSONConverter.writeToFile(json, saveFile.getAbsolutePath());
-
-                // Read the JSON file and display its content in the output area
-                try (Scanner scanner = new Scanner(saveFile)) {
-                    StringBuilder jsonOutput = new StringBuilder();
-                    while (scanner.hasNextLine()) {
-                        jsonOutput.append(scanner.nextLine()).append("\n");
-                    }
-                    outputArea.setText(jsonOutput.toString());
-                } catch (IOException e) {
-                    showErrorDialog("Error reading JSON: " + e.getMessage());
-                }
+                outputArea.setText(new String(java.nio.file.Files.readAllBytes(saveFile.toPath())));
             }
         } catch (Exception e) {
             showErrorDialog("Error converting to JSON: " + e.getMessage());
@@ -158,43 +337,35 @@ public class MainApp extends Application {
     }
     private void compressFile() {
         try {
-            // Get the input and output areas
-            VBox inputSection = (VBox) root.getTop();
-            TextArea xmlInputArea = (TextArea) inputSection.getChildren().get(1);
-            VBox outputSection = (VBox) root.getBottom();
-            TextArea outputArea = (TextArea) outputSection.getChildren().get(1);
-
             String inputText = xmlInputArea.getText();
             if (inputText.isEmpty()) {
                 showErrorDialog("Input XML/JSON is empty. Please load or type content.");
                 return;
             }
 
-            // Prompt user to choose the output file path for the compressed .comp file
+            // Write the input text to a temporary file
+            File tempInputFile = File.createTempFile("temp_input_", ".txt");
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempInputFile))) {
+                writer.write(inputText);
+            }
+
+            // Compress the file
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("COMP Files", "*.comp"));
             fileChooser.setInitialFileName("compressed.comp");
             File compFile = fileChooser.showSaveDialog(null);
 
             if (compFile != null) {
-                // Call the Compressor's compress method
-                Compressor.formatAndSaveCompressedFile(inputText, compFile.getAbsolutePath());
-
-                // Now, read the compressed file and display it in the output area
-                try (DataInputStream compFileStream = new DataInputStream(new FileInputStream(compFile))) {
-                    StringBuilder compressedContent = new StringBuilder();
-                    while (compFileStream.available() > 0) {
-                        int code = compFileStream.readInt();  // Read each compressed code (LZW codes)
-                        compressedContent.append(code).append("\n");  // Append code for display
-                    }
-
-                    // Display the raw compressed codes in the output area
-                    outputArea.setText(compressedContent.toString());
-
-                } catch (IOException e) {
-                    showErrorDialog("Error reading compressed file: " + e.getMessage());
-                }
+                System.out.println("Saving compressed file to: " + compFile.getAbsolutePath());  // Debugging line
+                Compressor.formatAndSaveCompressedFile(tempInputFile.getAbsolutePath(), compFile.getAbsolutePath());
+                outputArea.setText("File compressed successfully.");
+            } else {
+                showErrorDialog("File save cancelled.");
             }
+
+            // Optionally delete the temporary file after compression
+            tempInputFile.delete();
+
         } catch (Exception e) {
             showErrorDialog("Error during compression: " + e.getMessage());
         }
@@ -202,79 +373,52 @@ public class MainApp extends Application {
 
     private void decompressFile() {
         try {
-            // Get the output section TextArea
-            VBox outputSection = (VBox) root.getBottom();
-            TextArea outputArea = (TextArea) outputSection.getChildren().get(1);
-
-            // Prompt the user to choose the compressed file
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("COMP Files", "*.comp"));
-            fileChooser.setTitle("Select Compressed File");
             File compressedFile = fileChooser.showOpenDialog(null);
 
             if (compressedFile != null) {
-                // Prompt the user to choose where to save the decompressed file
                 FileChooser saveChooser = new FileChooser();
                 saveChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
                 saveChooser.setInitialFileName("decompressed.xml");
                 File decompressedFile = saveChooser.showSaveDialog(null);
 
                 if (decompressedFile != null) {
-                    // Call the Decompressor to decompress the file
                     Decompressor.decompress(compressedFile.getAbsolutePath(), decompressedFile.getAbsolutePath());
-
-                    // Read the decompressed file and display its content
-                    String decompressedContent = new String(Files.readAllBytes(decompressedFile.toPath()));
-                    outputArea.setText(decompressedContent);
-
-                    System.out.println("Decompressed content displayed in the output area.");
+                    outputArea.setText(new String(java.nio.file.Files.readAllBytes(decompressedFile.toPath())));
                 }
             }
-        } catch (IOException e) {
-            showErrorDialog("Error during decompression: " + e.getMessage());
         } catch (Exception e) {
-            showErrorDialog("Unexpected error: " + e.getMessage());
+            showErrorDialog("Error during decompression: " + e.getMessage());
         }
     }
+
     private void minifyXML() {
         try {
-            // Get the input and output areas
-            VBox inputSection = (VBox) root.getTop();
-            TextArea xmlInputArea = (TextArea) inputSection.getChildren().get(1);
-            VBox outputSection = (VBox) root.getBottom();
-            TextArea outputArea = (TextArea) outputSection.getChildren().get(1);
-
             String inputXML = xmlInputArea.getText();
             if (inputXML.isEmpty()) {
                 showErrorDialog("Input XML is empty. Please load or type XML content.");
                 return;
             }
 
-            // Prompt user to select where to save the minified XML
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
             fileChooser.setInitialFileName("minified.xml");
             File saveFile = fileChooser.showSaveDialog(null);
 
             if (saveFile != null) {
-                // Write the input XML to a temporary file
                 File tempInputFile = File.createTempFile("tempInput", ".xml");
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempInputFile))) {
                     writer.write(inputXML);
                 }
 
-                // Minify the file using XMLMinifier
                 XMLMinifier minifier = new XMLMinifier(tempInputFile.getAbsolutePath(), saveFile.getAbsolutePath());
                 minifier.minify();
 
-                // Read the minified content and display it in the output area
                 String minifiedContent = new String(Files.readAllBytes(saveFile.toPath()));
                 outputArea.setText(minifiedContent);
 
-                // Cleanup temporary file
                 tempInputFile.delete();
-
-                System.out.println("Minified XML saved and displayed in the output area.");
             }
         } catch (IOException e) {
             showErrorDialog("Error during XML minification: " + e.getMessage());
@@ -283,20 +427,14 @@ public class MainApp extends Application {
         }
     }
 
-
     private void openFileChooser(TextArea xmlInputArea) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML/JSON Files", "*.xml"));
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            // Load file content into xmlInputArea
-            try (Scanner scanner = new Scanner(file)) {
-                StringBuilder content = new StringBuilder();
-                while (scanner.hasNextLine()) {
-                    content.append(scanner.nextLine()).append("\n");
-                }
-                xmlInputArea.setText(content.toString());
-            } catch (Exception e) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                xmlInputArea.setText(reader.lines().reduce("", (a, b) -> a + "\n" + b));
+            } catch (IOException e) {
                 showErrorDialog("Error loading file: " + e.getMessage());
             }
         }
@@ -309,7 +447,7 @@ public class MainApp extends Application {
         if (file != null) {
             try (PrintWriter writer = new PrintWriter(file)) {
                 writer.write(output);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 showErrorDialog("Error saving file: " + e.getMessage());
             }
         }
@@ -325,30 +463,5 @@ public class MainApp extends Application {
 
     public static void main(String[] args) {
         launch(args);
-
-        //String inputFilePath = "D:\\CSE-Senior 1\\Fall 25\\DSA\\Project\\TestFx\\src\\main\\java\\com\\example\\sample.xml";  // Change this to your actual input file path
-        //String outputFilePath = "file.comp";  // Output file as file.comp
-
-
-
-    }
-
-    // Method to read a file into a string
-    public static String readFile(String filePath) throws IOException {
-        StringBuilder content = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-        }
-        return content.toString();
-    }
-
-    // Method to write a string to a file
-    public static void writeFile(String filePath, String data) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(data);
-        }
     }
 }

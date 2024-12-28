@@ -177,15 +177,41 @@ public class Main extends Application {
     }
 
     private void validateXML() {
-        String inputXML = xmlInputArea.getText();
-        if (inputXML.isEmpty()) {
-            showErrorDialog("Input XML is empty. Please load or type XML content.");
-            return;
-        }
+        try {
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
 
-        boolean isValid = XMLValidate.validation(inputXML);
-        outputArea.setText(isValid ? "Valid XML." : "Invalid XML.");
+            // Validate and get the corrected XML (if any)
+            String correctedXML = XMLValidate.validation(inputXML);
+
+            // Check if the XML was modified or not
+            if (correctedXML.equals(inputXML)) {
+                outputArea.setText("Valid XML.");
+            } else {
+                outputArea.setText("Invalid XML. Please check the corrected file.");
+
+                // Prompt user to save the corrected XML file
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+                fileChooser.setInitialFileName("corrected.xml");
+                File saveFile = fileChooser.showSaveDialog(null);
+
+                if (saveFile != null) {
+                    // Save the corrected XML content to the chosen file
+                    XMLFormatter.formatXML(correctedXML, saveFile.getAbsolutePath());
+
+                    // Display the saved corrected XML in the output area
+                    outputArea.setText(correctedXML);
+                }
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error processing XML: " + e.getMessage());
+        }
     }
+
 
     private void prettifyXML() {
         try {
@@ -232,7 +258,6 @@ public class Main extends Application {
             showErrorDialog("Error converting to JSON: " + e.getMessage());
         }
     }
-
     private void compressFile() {
         try {
             String inputText = xmlInputArea.getText();
@@ -241,15 +266,29 @@ public class Main extends Application {
                 return;
             }
 
+            // Write the input text to a temporary file
+            File tempInputFile = File.createTempFile("temp_input_", ".txt");
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempInputFile))) {
+                writer.write(inputText);
+            }
+
+            // Compress the file
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("COMP Files", "*.comp"));
             fileChooser.setInitialFileName("compressed.comp");
             File compFile = fileChooser.showSaveDialog(null);
 
             if (compFile != null) {
-                Compressor.formatAndSaveCompressedFile(inputText, compFile.getAbsolutePath());
+                System.out.println("Saving compressed file to: " + compFile.getAbsolutePath());  // Debugging line
+                Compressor.formatAndSaveCompressedFile(tempInputFile.getAbsolutePath(), compFile.getAbsolutePath());
                 outputArea.setText("File compressed successfully.");
+            } else {
+                showErrorDialog("File save cancelled.");
             }
+
+            // Optionally delete the temporary file after compression
+            tempInputFile.delete();
+
         } catch (Exception e) {
             showErrorDialog("Error during compression: " + e.getMessage());
         }

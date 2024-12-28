@@ -1,0 +1,87 @@
+import java.util.*;
+
+public class SuggestedFollowers {
+
+    // Builds an adjacency list from the list of Node objects
+    public static Map<Integer, List<Integer>> buildAdjacencyListFromNodes(List<Node> nodes) {
+        Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
+
+        // Iterate through all the nodes and build the adjacency list
+        for (Node userNode : nodes) {
+            if ("user".equals(userNode.tagName)) {
+                System.out.println("Processing User Node: " + userNode);
+
+                int userId = -1;
+                List<Integer> followers = new ArrayList<>();
+
+                // Extract the user ID and their followers
+                for (Node child : userNode.children) {
+                    if ("id".equals(child.tagName)) {
+                        userId = Integer.parseInt(child.tagValue);
+                    } else if ("followers".equals(child.tagName)) {
+                        for (Node followerNode : child.children) {
+                            if ("follower".equals(followerNode.tagName)) {
+                                for (Node followerChild : followerNode.children) {
+                                    if ("id".equals(followerChild.tagName)) {
+                                        followers.add(Integer.parseInt(followerChild.tagValue));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Add user and their followers to the adjacency list
+                if (userId != -1) {
+                    adjacencyList.put(userId, followers);
+                }
+            }
+        }
+
+        System.out.println("Built Adjacency List: " + adjacencyList);
+        return adjacencyList;
+    }
+
+    // Suggests followers (friends of friends but not direct friends) for a user
+    public static List<Integer> suggestFollowers(Map<Integer, List<Integer>> graph, int userId) {
+        // Debug: Print the adjacency list
+        System.out.println("Adjacency List: " + graph);
+
+        // Check if the user exists in the adjacency list
+        if (!graph.containsKey(userId)) {
+            System.out.println("User ID not found in the network!");
+            return new ArrayList<>();
+        }
+
+        List<Integer> suggestedFollowers = new ArrayList<>();
+        List<Integer> directFollowers = graph.getOrDefault(userId, new ArrayList<>()); // Direct followers of the user
+        Set<Integer> alreadySuggested = new HashSet<>(directFollowers); // Avoid duplicates
+
+        // Add user ID to avoid suggesting themselves
+        alreadySuggested.add(userId);
+
+        // Debug: Print direct followers
+        System.out.println("Direct Followers for User " + userId + ": " + directFollowers);
+
+        // Iterate through the direct followers to find friends of friends
+        for (int follower : directFollowers) {
+            List<Integer> friendsOfFollower = graph.getOrDefault(follower, new ArrayList<>());
+
+            // Debug: Print friends of the current follower
+            System.out.println("Friends of Follower " + follower + ": " + friendsOfFollower);
+
+            for (int potentialSuggestion : friendsOfFollower) {
+                // Add to suggestions if not the user itself and not a direct follower
+                if (!alreadySuggested.contains(potentialSuggestion)) {
+                    suggestedFollowers.add(potentialSuggestion);
+                    alreadySuggested.add(potentialSuggestion); // Mark as suggested
+                }
+            }
+        }
+
+        // Debug: Print suggested followers
+        System.out.println("Suggested Followers for User " + userId + ": " + suggestedFollowers);
+
+        return suggestedFollowers;
+    }
+}

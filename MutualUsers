@@ -1,0 +1,57 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class MutualUsers {
+
+    // Finds mutual friends from the list of Node objects
+    public static List<Integer> findMutualFriends(List<Node> nodes, List<Integer> userIds) {
+        Map<Integer, List<Integer>> adjacencyList = buildAdjacencyList(nodes);
+
+        // Check for valid input
+        if (userIds == null || userIds.size() < 2) {
+            throw new IllegalArgumentException("At least two user IDs are required to find mutual friends.");
+        }
+
+        // Initialize with the followers of the first user
+        List<Integer> mutualFriends = new ArrayList<>(adjacencyList.getOrDefault(userIds.get(0), new ArrayList<>()));
+
+        // Intersect with followers of the remaining users
+        for (int i = 1; i < userIds.size(); i++) {
+            List<Integer> currentFriends = adjacencyList.getOrDefault(userIds.get(i), new ArrayList<>());
+            mutualFriends.retainAll(currentFriends); // Efficient list intersection
+        }
+
+        return mutualFriends;
+    }
+
+    // Builds an adjacency list from the list of Node objects
+    public static Map<Integer, List<Integer>> buildAdjacencyList(List<Node> nodes) {
+        Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
+
+        for (Node userNode : nodes) {
+            if ("user".equals(userNode.tagName)) {
+                int userId = Integer.parseInt(userNode.tagValue);
+
+                // Initialize the adjacency list for this user
+                adjacencyList.putIfAbsent(userId, new ArrayList<>());
+
+                // Add followers to the adjacency list
+                for (Node followerNode : userNode.children) {
+                    if ("follower".equals(followerNode.tagName)) {
+                        int followerId = Integer.parseInt(followerNode.tagValue);
+                        adjacencyList.get(userId).add(followerId);
+                    }
+                }
+            }
+        }
+
+        return adjacencyList;
+    }
+
+    // Example method to parse the XML into nodes (simplified for your example)
+    public static List<Node> parseXMLToNodes(String xmlContent) {
+        // You need to implement this method to convert your XML into Node objects
+        // I won't implement XML parsing here since your XML structure is complex.
+        return new ArrayList<>();
+    }
+}

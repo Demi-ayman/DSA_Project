@@ -125,8 +125,8 @@ public class Main extends Application {
     }
 
     private VBox createButtonSection() {
-        VBox buttonSection = new VBox(8);
-        buttonSection.setPadding(new Insets(48, 15, 15, 15));  // Slightly more padding to move buttons down
+        VBox buttonSection = new VBox(5);
+        buttonSection.setPadding(new Insets(45, 12, 12, 12));  // Slightly more padding to move buttons down
         buttonSection.setAlignment(Pos.TOP_LEFT);
 
         String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
@@ -155,29 +155,30 @@ public class Main extends Application {
         minifyButton.setStyle(buttonStyle);
         minifyButton.setOnAction(event -> minifyXML());
 
-        // Add new button for parsing XML and saving output
         Button parseXMLButton = new Button("Parse and Save XML");
         parseXMLButton.setStyle(buttonStyle);
         parseXMLButton.setOnAction(event -> parseAndSaveXML());
 
-        // Add new button for visualizing and saving the graph
-        Button visualizeGraphButton = new Button("Visualize and Save Graph");
+        Button visualizeGraphButton = new Button("Visualize_Save Graph");
         visualizeGraphButton.setStyle(buttonStyle);
         visualizeGraphButton.setOnAction(event -> visualizeAndSaveGraph());
 
-        // Button for finding the most influential user
-        Button mostInfluentialButton = new Button("Find Most Influential User");
+        Button mostInfluentialButton = new Button("Most Influential User");
         mostInfluentialButton.setStyle(buttonStyle);
         mostInfluentialButton.setOnAction(event -> findMostInfluentialUser());
 
-        // Button for finding the most active user
-        Button mostActiveButton = new Button("Find Most Active User");
+        Button mostActiveButton = new Button("Most Active User");
         mostActiveButton.setStyle(buttonStyle);
         mostActiveButton.setOnAction(event -> findMostActiveUser());
 
+        Button mutualUsersButton = new Button("Mutual User");
+        mutualUsersButton.setStyle(buttonStyle);
+        mutualUsersButton.setOnAction(event -> findMutualUsers());
+
         buttonSection.getChildren().addAll(
                 validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton,
-                minifyButton, parseXMLButton, visualizeGraphButton, mostInfluentialButton, mostActiveButton
+                minifyButton, parseXMLButton, visualizeGraphButton, mostInfluentialButton, mostActiveButton,
+                mutualUsersButton
         );
         return buttonSection;
     }
@@ -252,6 +253,50 @@ public class Main extends Application {
 
         // Return the list of nodes
         return nodes;
+    }
+
+    private void findMutualUsers() {
+        try {
+            // Get the XML input from the text area
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the input XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML);
+
+            // Prompt the user for the IDs of users to compare
+            String userInput = JOptionPane.showInputDialog("Enter user IDs to compare (comma-separated):");
+            if (userInput == null || userInput.trim().isEmpty()) {
+                showErrorDialog("No user IDs entered. Please provide user IDs to find mutual users.");
+                return;
+            }
+
+            // Parse the input into a list of integers
+            List<Integer> userIds = new ArrayList<>();
+            try {
+                for (String id : userInput.split(",")) {
+                    userIds.add(Integer.parseInt(id.trim()));
+                }
+            } catch (NumberFormatException e) {
+                showErrorDialog("Invalid user ID format. Please enter numeric user IDs separated by commas.");
+                return;
+            }
+
+            // Use the MutualUsers class to find mutual friends
+            List<Integer> mutualFriends = MutualUsers.findMutualFriends(nodes, userIds);
+
+            // Display the result in the output area
+            if (mutualFriends.isEmpty()) {
+                outputArea.setText("No mutual users found.");
+            } else {
+                outputArea.setText("Mutual Users: are " + mutualFriends);
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error finding mutual users: " + e.getMessage());
+        }
     }
 
     private void findMostActiveUser() {

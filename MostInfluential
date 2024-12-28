@@ -1,0 +1,30 @@
+import java.util.*;
+
+public class MostInfluential {
+
+    private List<Node> nodes;  // List of nodes (users with followers)
+
+    // Constructor that accepts the list of nodes (from XML parsing)
+    public MostInfluential(List<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    // Method to find the most influential user based on the number of followers
+    public int findMostInfluentialUser() {
+        int mostInfluentialUserId = -1;
+        int maxFollowersCount = -1;
+
+        // Iterate over all nodes (users) to find the one with the most followers
+        for (Node userNode : nodes) {
+            int followerCount = userNode.children.size();  // The number of followers is the size of the children list
+
+            // Check if this user has more followers than the current max
+            if (followerCount > maxFollowersCount) {
+                maxFollowersCount = followerCount;
+                mostInfluentialUserId = Integer.parseInt(userNode.tagValue);  // Set the most influential user's ID
+            }
+        }
+
+        return mostInfluentialUserId;  // Return the ID of the most influential user
+    }
+}

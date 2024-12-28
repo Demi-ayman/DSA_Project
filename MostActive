@@ -1,0 +1,49 @@
+import java.util.*;
+
+public class MostActive {
+    private List<Node> nodes;
+
+    // Updated constructor to accept a list of Node objects
+    public MostActive(List<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    // Finds the most active user by processing the Node list
+    public int findMostActiveUser() {
+        Map<Integer, Integer> activityMap = new HashMap<>();
+
+        // Traverse through the nodes to calculate outgoing connections for each user
+        for (Node node : nodes) {
+            if ("user".equals(node.tagName)) {
+                int userId = Integer.parseInt(node.tagValue);
+
+                // Count the number of followers this user is following (outgoing connections)
+                int connections = 0;
+                for (Node child : node.children) {
+                    if ("follower".equals(child.tagName)) {
+                        connections++;
+                    }
+                }
+
+                // Store the activity count in the map
+                activityMap.put(userId, connections);
+            }
+        }
+
+        // Find the user with the maximum outgoing connections
+        int mostActiveUser = -1;
+        int maxConnections = 0;
+
+        for (Map.Entry<Integer, Integer> entry : activityMap.entrySet()) {
+            int userId = entry.getKey();
+            int connections = entry.getValue();
+
+            if (connections > maxConnections) {
+                maxConnections = connections;
+                mostActiveUser = userId;
+            }
+        }
+
+        return mostActiveUser;
+    }
+}

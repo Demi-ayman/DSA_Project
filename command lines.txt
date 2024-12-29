@@ -1,0 +1,35 @@
+Validate: 
+javac -cp "D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/XMLValidate.java
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.XMLValidate verify -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\sample.xml"
+
+-----------------------------------------------------------------------------------------------------------
+Formate:
+javac -cp "D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/XMLFormatter.java   
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.XMLFormatter format -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\sample.xml" -o "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\formatted_sample.xml"    
+
+------------------------------------------------------------------------------------------------------------
+ConvertToJson:
+javac -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/TreeToJSONConverter.java
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.TreeToJSONConverter json -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\sample.xml" -o "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\output.json"
+
+-----------------------------------------------------------------------------------------------------------
+Minifying:
+javac -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/XMLMinifier.java     
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.XMLMinifier mini -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\sample.xml" -o "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\output_file.xml" 
+
+-----------------------------------------------------------------------------------------------------------
+Compress:
+javac -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/Compressor.java
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.Compressor compress -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\sample.xml" -o "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\output_file.comp"
+
+------------------------------------------------------------------------------------------------------------
+Decompress:
+javac -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com/example/Decompressor.java
+
+java -cp ".;D:\intellij\openjfx-23.0.1_windows-x64_bin-sdk\javafx-sdk-23.0.1\lib\*" com.example.Decompressor decompress -i "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\output_file.comp" -o "D:\CSE-Senior 1\Fall 25\DSA\Project\TestFx\src\main\java\com\example\Decompress.xml"
+

@@ -3,18 +3,18 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node {
+public class NodeJson {
     public String tagName;
     public String tagValue;
-    public List<Node> children;
+    public List<NodeJson> children;
 
-    public Node(String tagName) {
+    public NodeJson(String tagName) {
         this.tagName = tagName;
         this.tagValue = "";
         this.children = new ArrayList<>();
     }
 
-    public void addChild(Node child) {
+    public void addChild(NodeJson child) {
         this.children.add(child);
     }
 }

@@ -65,4 +65,43 @@ public class Compressor {
         // Compress the file content and save to the output
         compress(inputFilePath, outputFilePath);
     }
+
+    // Main method with command-line argument handling
+    public static void main(String[] args) {
+        if (args.length < 4 || !args[0].equals("compress")) {
+            System.out.println("Usage: xml_editor compress -i input_file.xml -o output_file.comp");
+            return;
+        }
+
+        String inputFile = null;
+        String outputFile = null;
+
+        // Parse command-line arguments
+        for (int i = 1; i < args.length; i++) {
+            switch (args[i]) {
+                case "-i":
+                    inputFile = args[++i];
+                    break;
+                case "-o":
+                    outputFile = args[++i];
+                    break;
+                default:
+                    System.out.println("Invalid argument: " + args[i]);
+                    return;
+            }
+        }
+
+        if (inputFile == null || outputFile == null) {
+            System.out.println("Both input and output files are required.");
+            return;
+        }
+
+        try {
+            // Step 1: Compress the file and save to the output file
+            formatAndSaveCompressedFile(inputFile, outputFile);
+            System.out.println("File compressed and saved to: " + outputFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

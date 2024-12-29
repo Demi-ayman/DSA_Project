@@ -126,7 +126,7 @@ public class Main extends Application {
 
     private VBox createButtonSection() {
         VBox buttonSection = new VBox(3);
-        buttonSection.setPadding(new Insets(43, 10, 10, 20));  // Slightly more padding to move buttons down
+        buttonSection.setPadding(new Insets(43, 10, 10, 30));  // Slightly more padding to move buttons down
         buttonSection.setAlignment(Pos.TOP_LEFT);
 
         String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
@@ -179,10 +179,14 @@ public class Main extends Application {
         suggestedFollowersButton.setStyle(buttonStyle);
         suggestedFollowersButton.setOnAction(event -> suggestedFollowers());
 
+        Button postSearchButton = new Button("Post Search");
+        postSearchButton.setStyle(buttonStyle);
+        postSearchButton.setOnAction(event -> postSearch());
+
         buttonSection.getChildren().addAll(
                 validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton,
                 minifyButton, parseXMLButton, visualizeGraphButton, mostInfluentialButton, mostActiveButton,
-                mutualUsersButton,suggestedFollowersButton
+                mutualUsersButton,suggestedFollowersButton, postSearchButton
         );
         return buttonSection;
     }
@@ -257,6 +261,58 @@ public class Main extends Application {
 
         // Return the list of nodes
         return nodes;
+    }
+
+    private void postSearch() {
+        try {
+            // Get the input XML from the text area in the app
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML); // Assuming parseXMLToNodes() is implemented
+            System.out.println("Parsed Nodes: " + nodes);
+
+            // Ask the user for the search criteria (word or topic)
+            String searchTerm = JOptionPane.showInputDialog("Enter the word or topic to search for:");
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                showErrorDialog("Search term cannot be empty.");
+                return;
+            }
+
+            // Ask the user if they want to search by word or topic
+            Object[] options = {"Search by Word", "Search by Topic"};
+            int choice = JOptionPane.showOptionDialog(null, "Select search type", "Search Type",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+            List<PostSearch.Post> matchingPosts = new ArrayList<>();
+
+            if (choice == 0) {
+                // Search by word in the post content
+                matchingPosts = PostSearch.searchPostsByWord(nodes, searchTerm);
+            } else if (choice == 1) {
+                // Search by topic
+                matchingPosts = PostSearch.searchPostsByTopic(nodes, searchTerm);
+            }
+
+            // Display the results in the output area
+            if (matchingPosts.isEmpty()) {
+                outputArea.setText("No posts found with the search term: " + searchTerm);
+            } else {
+                StringBuilder resultText = new StringBuilder("Posts found with the search term: " + searchTerm + "\n\n");
+                for (PostSearch.Post post : matchingPosts) {
+                    resultText.append("Post ID: ").append(post.getId()).append("\n");
+                    resultText.append("Post Content: ").append(post.getContent()).append("\n");
+                    resultText.append("Topics: ").append(String.join(", ", post.getTopics())).append("\n\n");
+                }
+                outputArea.setText(resultText.toString());
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error during post search: " + e.getMessage());
+        }
     }
 
     private void suggestedFollowers() {

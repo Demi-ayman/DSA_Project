@@ -1,45 +1,60 @@
 package com.example;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import org.w3c.dom.*;
+import javax.xml.parsers.*;
+import org.xml.sax.InputSource;
+import java.io.*;
 
-public class TreeToJSONConverter {
+public class XMLToTreeConverter {
 
-    public static String convertToJSON(Node root) {
-        return convertNodeToJSON(root, 0); // Start at indentation level 0
+    // Method to parse XML from a file
+    public static NodeJson parseXML(String filePath) {
+        try {
+            File file = new File(filePath);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(file);
+            document.getDocumentElement().normalize();
+
+            return buildTree(document.getDocumentElement());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    private static String convertNodeToJSON(Node node, int indentLevel) {
-        StringBuilder json = new StringBuilder();
-        String indent = "  ".repeat(indentLevel); // Two spaces per level
+    // Method to parse XML from a string
+    public static NodeJson parseXMLFromString(String xmlContent) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(xmlContent)));
+            document.getDocumentElement().normalize();
 
-        json.append(indent).append("{\n");
-        json.append(indent).append("  \"").append(node.tagName).append("\": ");
+            return buildTree(document.getDocumentElement());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-        if (node.children.isEmpty()) {
-            // If there are no children, add the value
-            json.append("\"").append(node.tagValue).append("\"\n");
-        } else {
-            // If there are children, add them as an array
-            json.append("[\n");
-            for (int i = 0; i < node.children.size(); i++) {
-                json.append(convertNodeToJSON(node.children.get(i), indentLevel + 2));
-                if (i < node.children.size() - 1) {
-                    json.append(",");
-                }
-                json.append("\n");
+    private static NodeJson buildTree(Element element) {
+        NodeJson node = new NodeJson(element.getTagName());
+
+        // If the element has a text value, add it as the node's value
+        if (element.getTextContent() != null && !element.getTextContent().trim().isEmpty()) {
+            node.tagValue = element.getTextContent().trim();
+        }
+
+        // Add child nodes
+        NodeList children = element.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i).getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { // Fully qualify ELEMENT_NODE
+                Element childElement = (Element) children.item(i);
+                node.addChild(buildTree(childElement));
             }
-            json.append(indent).append("]");
         }
 
-        json.append("\n").append(indent).append("}");
-        return json.toString();
-    }
-
-    public static void writeToFile(String json, String outputFilePath) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
-            writer.write(json);
-        }
+        return node;
     }
 }

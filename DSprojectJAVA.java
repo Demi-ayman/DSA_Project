@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DSprojectJAVA {
+public class XMLParser {
 
     public static class Post {
         private String body;
@@ -104,28 +104,36 @@ public class DSprojectJAVA {
             }
         }
 
-        public void displayGraph() {
-            for (User user : users) {
-                System.out.println("User ID: " + user.getId() + ", Name: " + user.getName());
-
-                System.out.println("Posts:");
-                for (Post post : user.getPosts()) {
-                    System.out.println("  Body: " + post.getBody());
-                    System.out.println("  Topics: " + String.join(" ", post.getTopics()));
-                }
-
-                System.out.println("Followers: " + user.getFollowers().stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(" ")));
-                System.out.println();
-            }
-        }
         public List<User> getUsers() {
             return this.users;
         }
 
-    }
+        public void displayGraphToFile(String filename) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+                for (User user : users) {
+                    writer.write("User ID: " + user.getId() + ", Name: " + user.getName());
+                    writer.newLine();
 
+                    writer.write("Posts:");
+                    writer.newLine();
+                    for (Post post : user.getPosts()) {
+                        writer.write("  Body: " + post.getBody());
+                        writer.newLine();
+                        writer.write("  Topics: " + String.join(" ", post.getTopics()));
+                        writer.newLine();
+                    }
+
+                    writer.write("Followers: " + user.getFollowers().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(" ")));
+                    writer.newLine();
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.err.println("Error writing to file: " + e.getMessage());
+            }
+        }
+    }
 
     private static Graph graph = new Graph();
     public static Graph getGraph() {
@@ -245,13 +253,12 @@ public class DSprojectJAVA {
         }
     }
 
-
     public static void main(String[] args) {
 
         // Parse the XML file and populate the graph
-        parseXML("sample.xml", graph);
+        parseXML("D:\\CSE-Senior 1\\Fall 25\\DSA\\Project\\TestFx\\src\\main\\java\\com\\example\\sample.xml", graph);
 
-        // Display the graph
-        graph.displayGraph();
+        // Save the graph to a file
+        graph.displayGraphToFile("output.txt");
     }
 }

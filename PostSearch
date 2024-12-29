@@ -1,0 +1,116 @@
+import java.util.*;
+import javax.swing.*;
+
+public class PostSearch {
+
+    // Search for posts by a specific topic
+    public static List<Post> searchPostsByTopic(List<Node> nodes, String topic) {
+        List<Post> matchingPosts = new ArrayList<>();
+
+        // Iterate through all nodes and find posts
+        for (Node postNode : nodes) {
+            if ("post".equals(postNode.tagName)) {
+                // Extract post details (ID, content, and topics)
+                int postId = -1;
+                String postContent = "";
+                List<String> postTopics = new ArrayList<>();
+
+                for (Node child : postNode.children) {
+                    if ("id".equals(child.tagName)) {
+                        postId = Integer.parseInt(child.tagValue);
+                    } else if ("content".equals(child.tagName)) {
+                        postContent = child.tagValue;
+                    } else if ("topics".equals(child.tagName)) {
+                        for (Node topicNode : child.children) {
+                            if ("topic".equals(topicNode.tagName)) {
+                                postTopics.add(topicNode.tagValue);
+                            }
+                        }
+                    }
+                }
+
+                // Add post to matching posts if the topic matches
+                if (postTopics.contains(topic)) {
+                    matchingPosts.add(new Post(postId, postContent, postTopics));
+                }
+            }
+        }
+
+        return matchingPosts;
+    }
+
+    // Search for posts by a specific word in the body
+    public static List<Post> searchPostsByWord(List<Node> nodes, String word) {
+        List<Post> matchingPosts = new ArrayList<>();
+
+        // Iterate through all nodes and find posts
+        for (Node postNode : nodes) {
+            if ("post".equals(postNode.tagName)) {
+                // Extract post details (ID, content, and topics)
+                int postId = -1;
+                String postContent = "";
+                List<String> postTopics = new ArrayList<>();
+
+                for (Node child : postNode.children) {
+                    if ("id".equals(child.tagName)) {
+                        postId = Integer.parseInt(child.tagValue);
+                    } else if ("content".equals(child.tagName)) {
+                        postContent = child.tagValue;
+                    } else if ("topics".equals(child.tagName)) {
+                        for (Node topicNode : child.children) {
+                            if ("topic".equals(topicNode.tagName)) {
+                                postTopics.add(topicNode.tagValue);
+                            }
+                        }
+                    }
+                }
+
+                // Check if the content contains the word (case-insensitive)
+                if (postContent.toLowerCase().contains(word.toLowerCase())) {
+                    matchingPosts.add(new Post(postId, postContent, postTopics));
+                }
+            }
+        }
+
+        return matchingPosts;
+    }
+
+    // Display posts with the user ID
+    public static void displayPosts(List<Post> posts) {
+        if (posts.isEmpty()) {
+            System.out.println("No posts found with the specified criteria.");
+        } else {
+            for (Post post : posts) {
+                System.out.println("Post ID: " + post.getId());
+                System.out.println("Post Content: " + post.getContent());
+                System.out.println("Topics: " + String.join(", ", post.getTopics()));
+                System.out.println("-----");
+            }
+        }
+    }
+
+    // Post class to represent a post (ID, content, and topics)
+    public static class Post {
+        private int id;
+        private String content;
+        private List<String> topics;
+
+        public Post(int id, String content, List<String> topics) {
+            this.id = id;
+            this.content = content;
+            this.topics = topics;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public List<String> getTopics() {
+            return topics;
+        }
+    }
+}

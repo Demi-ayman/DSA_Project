@@ -17,6 +17,13 @@ import javafx.scene.layout.StackPane;
 import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.List;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.*;
+import java.io.StringReader;
+import java.util.*;
 
 public class Main extends Application {
 
@@ -27,7 +34,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Start Page Background Image
-        Image startBackground = new Image("file:src/photos/Mina.jpg");
+        Image startBackground = new Image("file:D:\\CSE-Senior 1\\Fall 25\\DSA\\Project\\TestFx\\image\\startBackground.jpeg");
         ImageView startBackgroundView = new ImageView(startBackground);
         startBackgroundView.setPreserveRatio(false);
         startBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
@@ -67,7 +74,7 @@ public class Main extends Application {
 
     private void showMainProject(Stage primaryStage) {
         // Main Project Background Image
-        Image mainBackground = new Image("file:src/photos/Yous.jpg");
+        Image mainBackground = new Image("file:D:\\CSE-Senior 1\\Fall 25\\DSA\\Project\\TestFx\\image\\mainBackground.jpeg");
         ImageView mainBackgroundView = new ImageView(mainBackground);
         mainBackgroundView.setPreserveRatio(false);
         mainBackgroundView.fitWidthProperty().bind(primaryStage.widthProperty());
@@ -97,8 +104,6 @@ public class Main extends Application {
         primaryStage.setTitle("XML Editor");
     }
 
-
-
     private VBox createInputSection() {
         VBox inputSection = new VBox(10);
         inputSection.setPadding(new Insets(20));
@@ -122,10 +127,9 @@ public class Main extends Application {
     }
 
     private VBox createButtonSection() {
-        VBox buttonSection = new VBox(15);
-        buttonSection.setPadding(new Insets(55, 22, 22, 22));  // Slightly more padding to move buttons down
+        VBox buttonSection = new VBox(3);
+        buttonSection.setPadding(new Insets(43, 10, 10, 30));  // Slightly more padding to move buttons down
         buttonSection.setAlignment(Pos.TOP_LEFT);
-
 
         String buttonStyle = "-fx-background-color: #87CEEB; -fx-text-fill: white; -fx-font-size: 16px;";
 
@@ -153,17 +157,39 @@ public class Main extends Application {
         minifyButton.setStyle(buttonStyle);
         minifyButton.setOnAction(event -> minifyXML());
 
-        // Add new button for parsing XML and saving output
         Button parseXMLButton = new Button("Parse and Save XML");
         parseXMLButton.setStyle(buttonStyle);
         parseXMLButton.setOnAction(event -> parseAndSaveXML());
 
-        // Add new button for visualizing and saving the graph
-        Button visualizeGraphButton = new Button("Visualize and Save Graph");
+        Button visualizeGraphButton = new Button("Visualize_Save Graph");
         visualizeGraphButton.setStyle(buttonStyle);
         visualizeGraphButton.setOnAction(event -> visualizeAndSaveGraph());
 
-        buttonSection.getChildren().addAll(validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton, minifyButton, parseXMLButton, visualizeGraphButton);
+        Button mostInfluentialButton = new Button("Most Influential User");
+        mostInfluentialButton.setStyle(buttonStyle);
+        mostInfluentialButton.setOnAction(event -> findMostInfluentialUser());
+
+        Button mostActiveButton = new Button("Most Active User");
+        mostActiveButton.setStyle(buttonStyle);
+        mostActiveButton.setOnAction(event -> findMostActiveUser());
+
+        Button mutualUsersButton = new Button("Mutual User");
+        mutualUsersButton.setStyle(buttonStyle);
+        mutualUsersButton.setOnAction(event -> findMutualUsers());
+
+        Button suggestedFollowersButton = new Button("Suggested Users");
+        suggestedFollowersButton.setStyle(buttonStyle);
+        suggestedFollowersButton.setOnAction(event -> suggestedFollowers());
+
+        Button postSearchButton = new Button("Post Search");
+        postSearchButton.setStyle(buttonStyle);
+        postSearchButton.setOnAction(event -> postSearch());
+
+        buttonSection.getChildren().addAll(
+                validateButton, prettifyButton, convertToJSONButton, compressButton, decompressButton,
+                minifyButton, parseXMLButton, visualizeGraphButton, mostInfluentialButton, mostActiveButton,
+                mutualUsersButton,suggestedFollowersButton, postSearchButton
+        );
         return buttonSection;
     }
 
@@ -189,6 +215,248 @@ public class Main extends Application {
         outputSection.getChildren().addAll(outputLabel, outputArea, saveButton);
         return outputSection;
     }
+
+    // This method converts the XML content into Node objects
+    private List<Node> parseXMLToNodes(String xmlContent) throws Exception {
+        List<Node> nodes = new ArrayList<>();
+
+        // Create a DocumentBuilderFactory instance and initialize it
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        // Parse the XML content into a Document object using a StringReader
+        InputSource inputSource = new InputSource(new StringReader(xmlContent));
+        Document document = builder.parse(inputSource);
+
+        // Normalize the document (this is good practice for XML)
+        document.getDocumentElement().normalize();
+
+        // Get all the user elements from the XML
+        NodeList userList = document.getElementsByTagName("user");
+
+        // Iterate through each user element and extract information
+        for (int i = 0; i < userList.getLength(); i++) {
+            Element userElement = (Element) userList.item(i);
+
+            // Create a new Node object for the user
+            Node userNode = new Node("user");
+            userNode.tagValue = userElement.getElementsByTagName("id").item(0).getTextContent();  // Set the user ID
+
+            // Get all the followers for this user
+            NodeList followers = userElement.getElementsByTagName("follower");
+
+            // Iterate through each follower and add it to the user node
+            for (int j = 0; j < followers.getLength(); j++) {
+                Element followerElement = (Element) followers.item(j);
+
+                // Create a new Node object for the follower
+                Node followerNode = new Node("follower");
+                followerNode.tagValue = followerElement.getElementsByTagName("id").item(0).getTextContent();  // Set the follower ID
+
+                // Add the follower node as a child of the user node
+                userNode.addChild(followerNode);
+            }
+
+            // Add the user node to the list of nodes
+            nodes.add(userNode);
+        }
+
+        // Return the list of nodes
+        return nodes;
+    }
+
+    private void postSearch() {
+        try {
+            // Get the input XML from the text area in the app
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML); // Assuming parseXMLToNodes() is implemented
+            System.out.println("Parsed Nodes: " + nodes);
+
+            // Ask the user for the search criteria (word or topic)
+            String searchTerm = JOptionPane.showInputDialog("Enter the word or topic to search for:");
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                showErrorDialog("Search term cannot be empty.");
+                return;
+            }
+
+            // Ask the user if they want to search by word or topic
+            Object[] options = {"Search by Word", "Search by Topic"};
+            int choice = JOptionPane.showOptionDialog(null, "Select search type", "Search Type",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+            List<PostSearch.Post> matchingPosts = new ArrayList<>();
+
+            if (choice == 0) {
+                // Search by word in the post content
+                matchingPosts = PostSearch.searchPostsByWord(nodes, searchTerm);
+            } else if (choice == 1) {
+                // Search by topic
+                matchingPosts = PostSearch.searchPostsByTopic(nodes, searchTerm);
+            }
+
+            // Display the results in the output area
+            if (matchingPosts.isEmpty()) {
+                outputArea.setText("No posts found with the search term: " + searchTerm);
+            } else {
+                StringBuilder resultText = new StringBuilder("Posts found with the search term: " + searchTerm + "\n\n");
+                for (PostSearch.Post post : matchingPosts) {
+                    resultText.append("Post ID: ").append(post.getId()).append("\n");
+                    resultText.append("Post Content: ").append(post.getContent()).append("\n");
+                    resultText.append("Topics: ").append(String.join(", ", post.getTopics())).append("\n\n");
+                }
+                outputArea.setText(resultText.toString());
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error during post search: " + e.getMessage());
+        }
+    }
+
+    private void suggestedFollowers() {
+        try {
+            // Get the input XML from the text area in the app
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML); // Assuming parseXMLToNodes() is implemented
+            System.out.println("Parsed Nodes: " + nodes);
+
+            // Build the adjacency list from the nodes
+            Map<Integer, List<Integer>> graph = SuggestedFollowers.buildAdjacencyListFromNodes(nodes);
+
+            // Ask the user for the ID of the person to get suggestions for
+            String userIdInput = JOptionPane.showInputDialog("Enter the User ID to suggest followers for:");
+            if (userIdInput == null || userIdInput.trim().isEmpty()) {
+                showErrorDialog("User ID cannot be empty.");
+                return;
+            }
+
+            int userId;
+            try {
+                userId = Integer.parseInt(userIdInput);
+            } catch (NumberFormatException e) {
+                showErrorDialog("Invalid User ID. Please enter a valid number.");
+                return;
+            }
+
+            // Get suggested followers using the SuggestedFollowers class and the graph
+            List<Integer> suggestions = SuggestedFollowers.suggestFollowers(graph, userId);
+
+            // Display the suggested followers in the output area
+            if (suggestions.isEmpty()) {
+                outputArea.setText("No suggested followers for User ID: " + userId);
+            } else {
+                outputArea.setText("Suggested followers for User ID " + userId + ": " + suggestions);
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error suggesting followers: " + e.getMessage());
+        }
+    }
+
+
+    private void findMutualUsers() {
+        try {
+            // Get the XML input from the text area
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the input XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML);
+
+            // Prompt the user for the IDs of users to compare
+            String userInput = JOptionPane.showInputDialog("Enter user IDs to compare (comma-separated):");
+            if (userInput == null || userInput.trim().isEmpty()) {
+                showErrorDialog("No user IDs entered. Please provide user IDs to find mutual users.");
+                return;
+            }
+
+            // Parse the input into a list of integers
+            List<Integer> userIds = new ArrayList<>();
+            try {
+                for (String id : userInput.split(",")) {
+                    userIds.add(Integer.parseInt(id.trim()));
+                }
+            } catch (NumberFormatException e) {
+                showErrorDialog("Invalid user ID format. Please enter numeric user IDs separated by commas.");
+                return;
+            }
+
+            // Use the MutualUsers class to find mutual friends
+            List<Integer> mutualFriends = MutualUsers.findMutualFriends(nodes, userIds);
+
+            // Display the result in the output area
+            if (mutualFriends.isEmpty()) {
+                outputArea.setText("No mutual users found.");
+            } else {
+                outputArea.setText("Mutual Users: are " + mutualFriends);
+            }
+        } catch (Exception e) {
+            showErrorDialog("Error finding mutual users: " + e.getMessage());
+        }
+    }
+
+    private void findMostActiveUser() {
+        try {
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Assuming the logic for extracting most active user is implemented in `MostActive`
+            // Parse the input XML to get Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML);  // This function should convert the XML to Nodes
+
+            // Now, create an instance of MostActive and pass the nodes
+            MostActive mostActive = new MostActive(nodes);
+
+            // Find the most active user
+            int activeUserId = mostActive.findMostActiveUser();
+
+            // Output the result
+            outputArea.setText("Most Active User ID: " + activeUserId);
+        } catch (Exception e) {
+            showErrorDialog("Error finding most active user: " + e.getMessage());
+        }
+    }
+
+    private void findMostInfluentialUser() {
+        try {
+            // Retrieve the XML content from the input area
+            String inputXML = xmlInputArea.getText();
+            if (inputXML.isEmpty()) {
+                showErrorDialog("Input XML is empty. Please load or type XML content.");
+                return;
+            }
+
+            // Parse the input XML into Node objects
+            List<Node> nodes = parseXMLToNodes(inputXML);
+
+            // Create an instance of MostInfluential and pass the list of nodes
+            MostInfluential mostInfluential = new MostInfluential(nodes);
+
+            // Find the most influential user
+            int influentialUserId = mostInfluential.findMostInfluentialUser();
+
+            // Output the result (ID of the most influential user)
+            outputArea.setText("Most Influential User ID: " + influentialUserId);
+        } catch (Exception e) {
+            showErrorDialog("Error finding most influential user: " + e.getMessage());
+        }
+    }
+
     private void parseAndSaveXML() {
         try {
             // Open file chooser to select XML file
@@ -219,6 +487,7 @@ public class Main extends Application {
             showErrorDialog("Error parsing and saving XML: " + e.getMessage());
         }
     }
+
     private void visualizeAndSaveGraph() {
         try {
             // Check if the graph is populated
@@ -250,8 +519,6 @@ public class Main extends Application {
             showErrorDialog("Error visualizing and saving graph: " + e.getMessage());
         }
     }
-
-
 
     private void validateXML() {
         try {
@@ -289,7 +556,6 @@ public class Main extends Application {
         }
     }
 
-
     private void prettifyXML() {
         try {
             String inputXML = xmlInputArea.getText();
@@ -326,7 +592,7 @@ public class Main extends Application {
             File saveFile = fileChooser.showSaveDialog(null);
 
             if (saveFile != null) {
-                Node root = XMLToTreeConverter.parseXMLFromString(inputXML);
+                NodeJson root = XMLToTreeConverter.parseXMLFromString(inputXML);
                 String json = TreeToJSONConverter.convertToJSON(root);
                 TreeToJSONConverter.writeToFile(json, saveFile.getAbsolutePath());
                 outputArea.setText(new String(java.nio.file.Files.readAllBytes(saveFile.toPath())));
@@ -335,6 +601,7 @@ public class Main extends Application {
             showErrorDialog("Error converting to JSON: " + e.getMessage());
         }
     }
+
     private void compressFile() {
         try {
             String inputText = xmlInputArea.getText();
@@ -358,7 +625,7 @@ public class Main extends Application {
             if (compFile != null) {
                 System.out.println("Saving compressed file to: " + compFile.getAbsolutePath());  // Debugging line
                 Compressor.formatAndSaveCompressedFile(tempInputFile.getAbsolutePath(), compFile.getAbsolutePath());
-                outputArea.setText("File compressed successfully.");
+                outputArea.setText(new String(java.nio.file.Files.readAllBytes(compFile.toPath())));
             } else {
                 showErrorDialog("File save cancelled.");
             }

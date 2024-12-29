@@ -55,4 +55,48 @@ public class Decompressor {
             System.out.println("Decompressed data written to " + outputFilePath);
         }
     }
+
+    // This method is similar to the usage in other classes
+    public static void formatAndSaveDecompressedFile(String inputFilePath, String outputFilePath) {
+        try {
+            decompress(inputFilePath, outputFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Main method with command-line argument handling
+    public static void main(String[] args) {
+        if (args.length < 4 || !args[0].equals("decompress")) {
+            System.out.println("Usage: xml_editor decompress -i input_file.comp -o output_file.xml");
+            return;
+        }
+
+        String inputFile = null;
+        String outputFile = null;
+
+        // Parse command-line arguments
+        for (int i = 1; i < args.length; i++) {
+            switch (args[i]) {
+                case "-i":
+                    inputFile = args[++i];
+                    break;
+                case "-o":
+                    outputFile = args[++i];
+                    break;
+                default:
+                    System.out.println("Invalid argument: " + args[i]);
+                    return;
+            }
+        }
+
+        if (inputFile == null || outputFile == null) {
+            System.out.println("Both input and output files are required.");
+            return;
+        }
+
+        // Step 1: Decompress the file and save it to the output file
+        formatAndSaveDecompressedFile(inputFile, outputFile);
+        System.out.println("Decompression complete. Decompressed file saved to: " + outputFile);
+    }
 }

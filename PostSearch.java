@@ -1,16 +1,21 @@
-package org.example;
+
+package com.example;
+import com.example.XMLParser;
+
 import java.util.*;
+
+import static com.example.XMLParser.parseXML;
 
 public class PostSearch {
 
     // Search for posts by a specific topic
-    public List<DSprojectJAVA.Post> searchPostsByTopic(DSprojectJAVA.Graph graph, String topic) {
-        List<DSprojectJAVA.Post> matchingPosts = new ArrayList<>();
+    public List<XMLParser.Post> searchPostsByTopic(XMLParser.Graph graph, String topic) {
+        List<XMLParser.Post> matchingPosts = new ArrayList<>();
 
         // Iterate through all users in the graph
-        for (DSprojectJAVA.User user : graph.getUsers()) {
+        for (XMLParser.User user : graph.getUsers()) {
             // Iterate through all posts of each user
-            for (DSprojectJAVA.Post post : user.getPosts()) {
+            for (XMLParser.Post post : user.getPosts()) {
                 // Check if the post contains the topic
                 if (post.getTopics().contains(topic)) {
                     matchingPosts.add(post);
@@ -22,13 +27,13 @@ public class PostSearch {
     }
 
     // Search for posts by a specific word in the body
-    public List<DSprojectJAVA.Post> searchPostsByWord(DSprojectJAVA.Graph graph, String word) {
-        List<DSprojectJAVA.Post> matchingPosts = new ArrayList<>();
+    public List<XMLParser.Post> searchPostsByWord(XMLParser.Graph graph, String word) {
+        List<XMLParser.Post> matchingPosts = new ArrayList<>();
 
         // Iterate through all users in the graph
-        for (DSprojectJAVA.User user : graph.getUsers()) {
+        for (XMLParser.User user : graph.getUsers()) {
             // Iterate through all posts of each user
-            for (DSprojectJAVA.Post post : user.getPosts()) {
+            for (XMLParser.Post post : user.getPosts()) {
                 // Check if the post body contains the word
                 if (post.getBody().toLowerCase().contains(word.toLowerCase())) {
                     matchingPosts.add(post);
@@ -40,13 +45,13 @@ public class PostSearch {
     }
 
     // Display posts with the user ID
-    public void displayPosts(List<DSprojectJAVA.Post> posts, DSprojectJAVA.Graph graph) {
+    public void displayPosts(List<XMLParser.Post> posts, XMLParser.Graph graph) {
         if (posts.isEmpty()) {
             System.out.println("No posts found with the specified criteria.");
         } else {
-            for (DSprojectJAVA.Post post : posts) {
+            for (XMLParser.Post post : posts) {
                 // Find the user who posted the post
-                DSprojectJAVA.User user = findUserByPost(graph, post);
+                XMLParser.User user = findUserByPost(graph, post);
 
                 // Print the user's ID, name, post body, and topics
                 if (user != null) {
@@ -61,12 +66,35 @@ public class PostSearch {
     }
 
     // Helper method to find the user by their post
-    private DSprojectJAVA.User findUserByPost(DSprojectJAVA.Graph graph, DSprojectJAVA.Post post) {
-        for (DSprojectJAVA.User user : graph.getUsers()) {
+    private XMLParser.User findUserByPost(XMLParser.Graph graph, XMLParser.Post post) {
+        for (XMLParser.User user : graph.getUsers()) {
             if (user.getPosts().contains(post)) {
                 return user;
             }
         }
         return null;
+    }
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Create an instance of the graph
+        XMLParser.Graph graph = XMLParser.getGraph();
+
+        // Parse the XML file and populate the graph
+        parseXML("D:\\CSE-Senior 1\\Fall 25\\DSA\\Project\\TestFx\\src\\main\\java\\com\\example\\sample.xml", graph);
+        // Create an instance of PostSearch
+        PostSearch postSearch = new PostSearch();
+
+        // Search for posts containing a specific topic
+        System.out.println("Enter the topic you want to Search about : ");
+        String topic = scanner.nextLine();
+        List<XMLParser.Post> foundPostsByTopic = postSearch.searchPostsByTopic(graph, topic);
+        postSearch.displayPosts(foundPostsByTopic, graph);  // Pass the graph to displayPosts
+
+        // Search for posts containing a specific word in the body
+        System.out.println("Enter the Word you want to Search about : ");
+        String word = scanner.nextLine();
+        List<XMLParser.Post> foundPostsByWord = postSearch.searchPostsByWord(graph, word);
+        postSearch.displayPosts(foundPostsByWord, graph);  // Pass the graph to displayPosts
+
     }
 }

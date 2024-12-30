@@ -74,6 +74,7 @@ public class PostSearch {
         return null;
     }
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
         // Create an instance of the graph
         XMLParser.Graph graph = XMLParser.getGraph();
 
@@ -83,12 +84,16 @@ public class PostSearch {
         PostSearch postSearch = new PostSearch();
 
         // Search for posts containing a specific topic
-        List<XMLParser.Post> foundPostsByTopic = postSearch.searchPostsByTopic(graph, "Lorem");
+        System.out.println("Enter the topic you want to Search about : ");
+        String topic = scanner.nextLine();
+        List<XMLParser.Post> foundPostsByTopic = postSearch.searchPostsByTopic(graph, topic);
         //System.out.println("Posts containing the topic 'Technology':");
         postSearch.displayPosts(foundPostsByTopic, graph);  // Pass the graph to displayPosts
 
         // Search for posts containing a specific word in the body
-        List<XMLParser.Post> foundPostsByWord = postSearch.searchPostsByWord(graph, "Lorem");
+        System.out.println("Enter the Word you want to Search about : ");
+        String word = scanner.nextLine();
+        List<XMLParser.Post> foundPostsByWord = postSearch.searchPostsByWord(graph, word);
         //System.out.println("Posts containing the word 'AI':");
         postSearch.displayPosts(foundPostsByWord, graph);  // Pass the graph to displayPosts
 
